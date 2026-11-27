@@ -66,7 +66,7 @@ PLAYBACK_BUFFER_MS='100'
 ./start_client.sh
 ```
 
-服务端启动时会检查 NLTK 的 `punkt_tab` 分句资源；若新 Mac 尚未缓存，会自动下载到项目内的 `.nltk_data/`。该目录已加入 `.gitignore`。
+服务端启动时会检查 NLTK 的 `punkt_tab` 分句资源；若新 Mac 尚未缓存，会从 NLTK 官方地址下载、校验 SHA-256 后解压到项目内的 `.nltk_data/`。下载使用系统 `curl`，可经过常规代理，不依赖 NLTK 下载器的代理放行开关。该目录已加入 `.gitignore`。
 
 服务端启用 Paraformer-zh、Smart Turn、Silero VAD、流式 Chat Completions、关闭百炼思考模式，以及 Vivian 音色的 Qwen3-TTS 分块生成。语音回答默认最多 3 个短句、约 120 字；TTS 分块大小设为 4，句子批次设为 2，客户端播放缓冲设为 100ms，以提升较长回答的连续播放稳定性。服务绑定回环地址，不对局域网开放。客户端显示 `Ready — start speaking.` 后即可讲话。按 `Ctrl+C` 停止。
 
@@ -77,7 +77,7 @@ PLAYBACK_BUFFER_MS='100'
 - 401：检查 `.env` 是否存在、API Key 是否有效，以及脚本是否能读取变量。
 - 404：核对百炼工作空间 Base URL 和模型可用性。
 - TTS 模型未找到：运行 `./download_models.sh`，并确认 `~/.cache/huggingface/hub` 下模型快照完整。
-- `Resource 'punkt_tab' not found`：重新运行 `./start_server_cloud.sh`，脚本会自动下载缺少的分句资源。
+- `Resource 'punkt_tab' not found`：重新运行 `./start_server_cloud.sh`，脚本会自动下载并校验缺少的分句资源。若下载失败，检查该 Mac 的代理是否允许访问 `raw.githubusercontent.com`。
 - 音频仍有断续：将 `PLAYBACK_BUFFER_MS` 从 `100` 调到 `150`，并保持 `QWEN3_TTS_STREAMING_CHUNK_SIZE='4'`。
 - 麦克风不可用：在 macOS“系统设置 → 隐私与安全性 → 麦克风”允许所用终端。
 

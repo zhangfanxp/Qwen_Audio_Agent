@@ -34,9 +34,17 @@ fi
 NLTK_DATA_DIR="$ROOT/.nltk_data"
 export NLTK_DATA="$NLTK_DATA_DIR${NLTK_DATA:+:$NLTK_DATA}"
 if ! "$PYTHON" -c 'import nltk; nltk.data.find("tokenizers/punkt_tab/english/")' >/dev/null 2>&1; then
-  echo "Downloading NLTK punkt_tab sentence data..."
+  echo "Downloading verified NLTK punkt_tab sentence data..."
   mkdir -p "$NLTK_DATA_DIR"
-  "$PYTHON" -c 'import nltk, os, sys; ok = nltk.download("punkt_tab", download_dir=os.environ["NLTK_DATA"].split(os.pathsep)[0], quiet=True); sys.exit(0 if ok else 1)'
+  NLTK_DATA_ZIP="$NLTK_DATA_DIR/punkt_tab.zip"
+  curl --fail --location --retry 2 --connect-timeout 15 --max-time 180 \
+    --proto '=https' --tlsv1.2 \
+    --output "$NLTK_DATA_ZIP" \
+    'https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt_tab.zip'
+  "$PYTHON" -c 'import hashlib, sys; actual = hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest(); expected = "e57f64187974277726a3417ca6f181ec5403676c717672eef6a748a7b20e0106"; sys.exit(0 if actual == expected else "punkt_tab archive SHA-256 mismatch")' "$NLTK_DATA_ZIP"
+  mkdir -p "$NLTK_DATA_DIR/tokenizers"
+  unzip -oq "$NLTK_DATA_ZIP" -d "$NLTK_DATA_DIR/tokenizers"
+  rm -f "$NLTK_DATA_ZIP"
   "$PYTHON" -c 'import nltk; nltk.data.find("tokenizers/punkt_tab/english/")'
 fi
 
