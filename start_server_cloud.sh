@@ -30,6 +30,16 @@ if [[ ! -x "$PYTHON" ]]; then
   exit 1
 fi
 
+# NLTK 3.9+ needs punkt_tab for sentence splitting; prepare it before requests arrive.
+NLTK_DATA_DIR="$ROOT/.nltk_data"
+export NLTK_DATA="$NLTK_DATA_DIR${NLTK_DATA:+:$NLTK_DATA}"
+if ! "$PYTHON" -c 'import nltk; nltk.data.find("tokenizers/punkt_tab/english/")' >/dev/null 2>&1; then
+  echo "Downloading NLTK punkt_tab sentence data..."
+  mkdir -p "$NLTK_DATA_DIR"
+  "$PYTHON" -c 'import nltk, os, sys; ok = nltk.download("punkt_tab", download_dir=os.environ["NLTK_DATA"].split(os.pathsep)[0], quiet=True); sys.exit(0 if ok else 1)'
+  "$PYTHON" -c 'import nltk; nltk.data.find("tokenizers/punkt_tab/english/")'
+fi
+
 if [[ -d "$QWEN3_TTS_MODEL_PATH" ]]; then
   [[ -f "$QWEN3_TTS_MODEL_PATH/config.json" ]] || {
     echo "TTS model directory is incomplete: $QWEN3_TTS_MODEL_PATH" >&2
