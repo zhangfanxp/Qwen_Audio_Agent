@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+user.json
+user.json.*
 
 # Python environments and caches
 .venv/
