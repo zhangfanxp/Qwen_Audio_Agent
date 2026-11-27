@@ -12,6 +12,11 @@ fi
 : "${S2S_PORT:=8765}"
 : "${PLAYBACK_BUFFER_MS:=0}"
 
+# This client connects only to the local Realtime server. Bypass system HTTP/SOCKS
+# proxies for loopback so websockets doesn't try to open a SOCKS tunnel to itself.
+export NO_PROXY="${NO_PROXY:+${NO_PROXY},}localhost,127.0.0.1,::1"
+export no_proxy="${no_proxy:+${no_proxy},}localhost,127.0.0.1,::1"
+
 if [[ ! -x .venv/bin/speech-to-speech ]]; then
   echo "Missing .venv or speech-to-speech. See DEPLOYMENT.md." >&2
   exit 1
